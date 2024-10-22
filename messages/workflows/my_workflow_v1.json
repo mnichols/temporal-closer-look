@@ -1,0 +1,8 @@
+{
+  "value": "v1_value",
+  "version": {
+    "root": "V1",
+    "max": 1,
+    "min": -1
+  }
+}

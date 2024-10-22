@@ -3,31 +3,31 @@ server:
 spring:
   main:
     allow-bean-definition-overriding: true
-    web-application-type: none;
   application:
-    name: temporal-closer-look
-  curriculum:
-    task-queue: app
+    name: temporal-jumpstart-java
   temporal:
     test-server:
-      enabled: false
+      enabled: true
     workers:
-      - task-queue: messages
-        # fullName: your-worker-fullName # unique fullName of the Worker. If not specified, Task Queue is used as the Worker fullName.
+      - task-queue: apps
+        # name: your-worker-name # unique name of the Worker. If not specified, Task Queue is used as the Worker name.
         workflow-classes:
-          #- io.temporal.closer.versioning.messages.WorkflowsDemoImpl
-          #- io.temporal.closer.versioning.messages.ActivitiesDemoImpl
-          - io.temporal.closer.versioning.messages.SignalsDemoImpl
-
+          - io.temporal.onboardings.domain.orchestrations.MyWorkflowImpl
         activity-beans:
-          - messages-versioning-activities
-      - task-queue: workflows
-        # fullName: your-worker-fullName # unique fullName of the Worker. If not specified, Task Queue is used as the Worker fullName.
+          - version-activity-handlers
+      - task-queue: replay_100
+        capacity:
+          max-concurrent-workflow-task-pollers: 2
+          max-concurrent-activity-task-pollers: 2
+          max-concurrent-workflow-task-executors: 4
+          max-concurrent-activity-executors: 2
+          max-concurrent-local-activity-executors: 4
+        # name: your-worker-name # unique name of the Worker. If not specified, Task Queue is used as the Worker name.
         workflow-classes:
-          - io.temporal.closer.versioning.workflows.MyWorkflowProxyImpl
-
+          - io.temporal.onboardings.domain.orchestrations.EntityOnboardingV100Impl
         activity-beans:
-          - workflows-versioning-activities
+          - integrations-handlers
+          - notifications-handlers
     namespace: default # https://docs.temporal.io/cloud/#temporal-cloud-namespace-id
     connection:
       target: 127.0.0.1:7233
@@ -44,8 +44,8 @@ spring:
 #        rate-limits:
 #          max-worker-activities-per-second: 3
 #          max-task-queue-activities-per-second: 3
-    workflow-cache:
-      max-instances: 0
+#    workflow-cache:
+#      max-instances: 10
 #      max-threads: 10
 management:
   endpoints:
