@@ -24,7 +24,7 @@ spring:
       - task-queue: workflows
         # fullName: your-worker-fullName # unique fullName of the Worker. If not specified, Task Queue is used as the Worker fullName.
         workflow-classes:
-          - io.temporal.closer.versioning.workflows.MyWorkflowProxyImpl
+          - io.temporal.closer.versioning.workflows.MyWorkflowImplV3
         activity-beans:
           - workflows-versioning-activities
     namespace: default # https://docs.temporal.io/cloud/#temporal-cloud-namespace-id

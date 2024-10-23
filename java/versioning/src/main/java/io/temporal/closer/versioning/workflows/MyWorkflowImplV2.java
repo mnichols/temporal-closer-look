@@ -11,9 +11,11 @@ import org.slf4j.LoggerFactory;
 public class MyWorkflowImplV2 implements MyWorkflow {
   private final Logger logger = LoggerFactory.getLogger(MyWorkflowImplV2.class);
   private final VersioningActivities acts;
+  private final ExecutionDetailsProvider executionDetailsProvider;
   private MyWorkflowParams params;
 
-  public MyWorkflowImplV2(MyWorkflowParams params) {
+  public MyWorkflowImplV2() {
+    this.executionDetailsProvider = new ExecutionDetailsProviderImpl();
     acts =
         Workflow.newActivityStub(
             VersioningActivities.class,
@@ -22,10 +24,14 @@ public class MyWorkflowImplV2 implements MyWorkflow {
 
   @Override
   public void execute(MyWorkflowParams params) {
+    this.executionDetailsProvider.init(getClass().getTypeName());
+
+    /* **********
+    This is the business logic we will modify over time
+    ************/
     this.params = params;
-    logger.info("executing {}", params);
     acts.act1(params.value());
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 3; i++) {
       // this change to command input does not require a version
       acts.act1(String.format("[%d]%s", i, params.value()));
     }
@@ -35,5 +41,10 @@ public class MyWorkflowImplV2 implements MyWorkflow {
   @Override
   public MyWorkflowParams getParams() {
     return this.params;
+  }
+
+  @Override
+  public ExecutionDetails getExecutionDetails() {
+    return this.executionDetailsProvider.getCurrentExecutionDetails(getClass().getTypeName());
   }
 }

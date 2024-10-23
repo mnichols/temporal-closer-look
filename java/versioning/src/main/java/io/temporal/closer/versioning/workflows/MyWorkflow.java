@@ -11,4 +11,7 @@ public interface MyWorkflow {
 
   @QueryMethod
   MyWorkflowParams getParams();
+
+  @QueryMethod
+  ExecutionDetails getExecutionDetails();
 }

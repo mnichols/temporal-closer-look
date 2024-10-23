@@ -5,56 +5,87 @@ Versioning strategy to make changes over time.
 
 ## How to simulate progressive changes
 
-The `MyWorkflowProxyImpl` delegates to the implementation version you specify in the input
-`version.root` parameter. 
-
-For example, this input params will execute `MyWorkflowImplV2`:
-```json
-{ "value": "foo", "version": { "root":  "V2"}}
-```
+The `MyWorkflowProxyImpl` delegates to the implementation version you specify.
+If you provide a `version.root` to input params it will use that version; eg "V2".
+If you append `__v<version>` to the WorkflowId it will use that version.
+If _both_ are provided, the `version.root` parameter will be the definition version used.
 
 ###### V1: Execute `MyWorkflow`
 
-Use the following args to start a workflow execution.
+_Designate the implementation in the `workflow-classes` to `MyWorkflowImplV1`_
+
+```yaml
+  # resources/application.yaml
+  temporal:
+    test-server:
+      enabled: false
+    workers:
+      # <snip>
+      - task-queue: workflows
+        workflow-classes:
+          # this implementation name is what we will be redeploying to simulate change over time
+          - io.temporal.closer.versioning.workflows.MyWorkflowImplV1
+        activity-beans:
+          - workflows-versioning-activities
+```
+Use the following command to start a workflow execution.
+You will keep Executions we start "Open" as we make changes to the Workflow implementation to verify Replay.
+Therefore, do not stop your Temporal service or delete the Executions.
 
 ```sh
 temporal workflow start \
   --task-queue workflows \
   --type MyWorkflow \
-  --workflow-id a1 \
-  --input {args}
+  --workflow-id a1__v1 \
+  --input '{"value":"foo"}'
 ```
 
-Where `args` is:
+Visit the Workflow Execution and observe the `open` execution.
+You can view the version of the `MyWorkflow` being used with the `getParams` query.
 
-```json
-{ "value": "foo", "version": {"root":  "V1"}}
+```sh
+temporal workflow query \
+  --name getExecutionDetails \
+  --workflow-id a1__v1
 ```
 
 ###### V2: Change input argument to `act1` 
 
-*Observe*: No Versioning required, but of course only future executions would not honor this change to activity input. 
+1. Update the `application.yaml` to use `MyWorkflowImplV2` instead of `MyWorkflowImplV1`.
+2. Rerun the Worker application.
 
-*Reason*: Changing command (input) arguments do not cause an Non-Determinism Exception (NDE)
+```sh
+temporal workflow query \
+  --name getExecutionDetails \
+  --workflow-id a1__v1
+```
+
+*Observe*: No NDE because no Versioning required; of course, only future executions would honor this change to activity input. 
+
+*Reason*: Changing command (input) arguments do not cause an Non-Determinism Exception (NDE) during Replay.
 
 *Fix*: N/A
 
+
 ###### V3: Add `act2` after first `act1` invocation
 
+1. Update the `application.yaml` to use `MyWorkflowImplV3` instead of `MyWorkflowImplV2`.
+2. Rerun the Worker application.
+
 *Observe*
-1. Run the `getValue` query
+1. Run the `getExecutionDetails` query
 2. See the `io.temporal.worker.NonDeterministicException`
 
-*Reason*: Inserting a command (here, an Activity) conflicts with the event history, so Replay will fail.
+*Reason*: Inserting a command (here, an Activity `act2`) conflicts with the event history, so Replay will fail.
 
 *Fix*: 
 1. Wrap the `act2` invocation inside a `GetVersion` result
 
 *Observe*
-1. Run the `getValue` query
+1. Run the `getExecutionDetails` query
 2. See the value returned, instead of an `io.temporal.worker.NonDeterministicException`
 3. Start a new Workflow execution with a different ID
-4. See the `act2` activity is executed inside the new Version of the Workflow
+4. See the `act2` Activity is executed inside the new Version of the Workflow
 
 *Reason*: 
 1. Since we did not mix both Versioned and unVersioned changes inside the deployment, we could safely repair our

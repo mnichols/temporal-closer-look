@@ -22,4 +22,13 @@ public class WorkflowsUtils {
 
     return null;
   }
+  //  public static MyWorkflowParams enrichParams(WorkflowInfo workflowInfo, MyWorkflowParams params
+  // ) {
+  //    var rootVersion = getRootVersion(workflowInfo.getWorkflowId(), params.version());
+  //    if(Objects.isNull(rootVersion)) {
+  //    }
+  //    if (rootVersion != null) {
+  //
+  //    }
+  //  }
 }

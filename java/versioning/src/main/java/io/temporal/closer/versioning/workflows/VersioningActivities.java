@@ -10,4 +10,7 @@ public interface VersioningActivities {
 
   @ActivityMethod
   String act2(String value);
+
+  @ActivityMethod
+  ExecutionDetails getExecutionDetails(String workflowImplementationType);
 }

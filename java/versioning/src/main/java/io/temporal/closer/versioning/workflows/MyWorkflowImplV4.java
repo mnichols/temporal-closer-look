@@ -8,9 +8,11 @@ import java.time.Duration;
 
 public class MyWorkflowImplV4 implements MyWorkflow {
   private final VersioningActivities acts;
+  private final ExecutionDetailsProvider executionDetailsProvider;
   private MyWorkflowParams params;
 
   public MyWorkflowImplV4() {
+    this.executionDetailsProvider = new ExecutionDetailsProviderImpl();
     acts =
         Workflow.newActivityStub(
             VersioningActivities.class,
@@ -19,6 +21,11 @@ public class MyWorkflowImplV4 implements MyWorkflow {
 
   @Override
   public void execute(MyWorkflowParams params) {
+    this.executionDetailsProvider.init(getClass().getTypeName());
+
+    /* **********
+    This is the business logic we will modify over time
+    ************/
     this.params = params;
 
     acts.act1(params.value());
@@ -41,5 +48,10 @@ public class MyWorkflowImplV4 implements MyWorkflow {
   @Override
   public MyWorkflowParams getParams() {
     return this.params;
+  }
+
+  @Override
+  public ExecutionDetails getExecutionDetails() {
+    return this.executionDetailsProvider.getCurrentExecutionDetails(getClass().getTypeName());
   }
 }
