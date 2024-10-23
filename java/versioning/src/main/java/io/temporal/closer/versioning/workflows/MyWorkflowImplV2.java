@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class MyWorkflowImplV2 implements MyWorkflow {
   private final Logger logger = LoggerFactory.getLogger(MyWorkflowImplV2.class);
   private final VersioningActivities acts;
-  private String value;
+  private MyWorkflowParams params;
 
   public MyWorkflowImplV2(MyWorkflowParams params) {
     acts =
@@ -22,8 +22,8 @@ public class MyWorkflowImplV2 implements MyWorkflow {
 
   @Override
   public void execute(MyWorkflowParams params) {
+    this.params = params;
     logger.info("executing {}", params);
-    this.value = params.value();
     acts.act1(params.value());
     for (var i = 0; i < 10; i++) {
       // this change to command input does not require a version
@@ -33,7 +33,7 @@ public class MyWorkflowImplV2 implements MyWorkflow {
   }
 
   @Override
-  public String getValue() {
-    return this.value;
+  public MyWorkflowParams getParams() {
+    return this.params;
   }
 }

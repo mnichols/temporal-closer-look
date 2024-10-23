@@ -14,8 +14,19 @@ public class MyWorkflowProxyImpl implements MyWorkflow {
   //
   //  }
 
-  private void setImpl(MyWorkflowParams params) {
-    var rootVersion = Objects.requireNonNull(params.version().root(), () -> "V1");
+  private MyWorkflowParams setImpl(MyWorkflowParams params) {
+    var rootVersion =
+        WorkflowsUtils.getRootVersion(Workflow.getInfo().getWorkflowId(), params.version());
+    if (Objects.isNull(rootVersion)) {
+      rootVersion = "V1";
+    }
+
+    String finalRootVersion = rootVersion;
+    var v =
+        Objects.requireNonNullElseGet(
+            params.version(), () -> new Version(finalRootVersion, Workflow.DEFAULT_VERSION));
+    params = new MyWorkflowParams(params.value(), new Version(rootVersion, v.max()));
+    
     switch (rootVersion.toUpperCase()) {
       case "V1":
         impl = new MyWorkflowImplV1(params);
@@ -27,18 +38,20 @@ public class MyWorkflowProxyImpl implements MyWorkflow {
         impl = new MyWorkflowImplV3(params);
         break;
     }
+
     logger.info(
         "execution {} using root version {}", Workflow.getInfo().getWorkflowId(), rootVersion);
+    return params;
   }
 
   @Override
   public void execute(MyWorkflowParams params) {
-    setImpl(params);
+    params = setImpl(params);
     this.impl.execute(params);
   }
 
   @Override
-  public String getValue() {
-    return this.impl.getValue();
+  public MyWorkflowParams getParams() {
+    return this.impl.getParams();
   }
 }

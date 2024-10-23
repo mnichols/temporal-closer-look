@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 public class MyWorkflowImplV1 implements MyWorkflow {
   private Logger logger = LoggerFactory.getLogger(MyWorkflowImplV1.class);
   private final VersioningActivities acts;
+  private MyWorkflowParams params;
 
   public MyWorkflowImplV1(MyWorkflowParams params) {
     acts =
@@ -21,6 +22,7 @@ public class MyWorkflowImplV1 implements MyWorkflow {
 
   @Override
   public void execute(MyWorkflowParams params) {
+    this.params = params;
     logger.info("executing {}", params);
     acts.act1(params.value());
     for (var i = 0; i < 3; i++) {
@@ -30,7 +32,7 @@ public class MyWorkflowImplV1 implements MyWorkflow {
   }
 
   @Override
-  public String getValue() {
-    return "";
+  public MyWorkflowParams getParams() {
+    return this.params;
   }
 }

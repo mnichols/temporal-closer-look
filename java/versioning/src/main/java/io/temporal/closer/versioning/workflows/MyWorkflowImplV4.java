@@ -8,7 +8,7 @@ import java.time.Duration;
 
 public class MyWorkflowImplV4 implements MyWorkflow {
   private final VersioningActivities acts;
-  private String value;
+  private MyWorkflowParams params;
 
   public MyWorkflowImplV4() {
     acts =
@@ -19,7 +19,7 @@ public class MyWorkflowImplV4 implements MyWorkflow {
 
   @Override
   public void execute(MyWorkflowParams params) {
-    this.value = params.value();
+    this.params = params;
 
     acts.act1(params.value());
     var ver = Workflow.getVersion("fix1", Workflow.DEFAULT_VERSION, 1);
@@ -39,7 +39,7 @@ public class MyWorkflowImplV4 implements MyWorkflow {
   }
 
   @Override
-  public String getValue() {
-    return this.value;
+  public MyWorkflowParams getParams() {
+    return this.params;
   }
 }

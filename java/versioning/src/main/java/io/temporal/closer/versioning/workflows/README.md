@@ -3,11 +3,37 @@
 This demonstrates an evolution of a Workflow definition called `MyWorkflow` that uses the _Patched_
 Versioning strategy to make changes over time.
 
-Run this application from 
+## How to simulate progressive changes
 
-###### V2: Change input argument to `act1` to include the index
+The `MyWorkflowProxyImpl` delegates to the implementation version you specify in the input
+`version.root` parameter. 
 
-*Observe*: No Versioning required, but of course current executions will not pick up this change 
+For example, this input params will execute `MyWorkflowImplV2`:
+```json
+{ "value": "foo", "version": { "root":  "V2"}}
+```
+
+###### V1: Execute `MyWorkflow`
+
+Use the following args to start a workflow execution.
+
+```sh
+temporal workflow start \
+  --task-queue workflows \
+  --type MyWorkflow \
+  --workflow-id a1 \
+  --input {args}
+```
+
+Where `args` is:
+
+```json
+{ "value": "foo", "version": {"root":  "V1"}}
+```
+
+###### V2: Change input argument to `act1` 
+
+*Observe*: No Versioning required, but of course only future executions would not honor this change to activity input. 
 
 *Reason*: Changing command (input) arguments do not cause an Non-Determinism Exception (NDE)
 

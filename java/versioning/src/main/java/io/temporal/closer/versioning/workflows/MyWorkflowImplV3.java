@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class MyWorkflowImplV3 implements MyWorkflow {
   private static Logger logger = LoggerFactory.getLogger(MyWorkflowImplV3.class);
   private final VersioningActivities acts;
-  private String value;
+  private MyWorkflowParams params;
 
   public MyWorkflowImplV3(MyWorkflowParams params) {
     acts =
@@ -22,8 +22,7 @@ public class MyWorkflowImplV3 implements MyWorkflow {
 
   @Override
   public void execute(MyWorkflowParams params) {
-    this.value = params.value();
-
+    this.params = params;
     acts.act1(params.value());
 
     // introduce activity without Versioning
@@ -47,7 +46,7 @@ public class MyWorkflowImplV3 implements MyWorkflow {
   }
 
   @Override
-  public String getValue() {
-    return this.value;
+  public MyWorkflowParams getParams() {
+    return this.params;
   }
 }

@@ -10,5 +10,5 @@ public interface MyWorkflow {
   void execute(MyWorkflowParams params);
 
   @QueryMethod
-  String getValue();
+  MyWorkflowParams getParams();
 }
